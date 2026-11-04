@@ -1,0 +1,25 @@
+{
+  "name": "meeting-manager",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "format": "prettier --write",
+    "format:check": "prettier --check"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vichaya-vich/meeting-manager.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/vichaya-vich/meeting-manager/issues"
+  },
+  "homepage": "https://github.com/vichaya-vich/meeting-manager#readme",
+  "devDependencies": {
+    "prettier": "^3.9.10"
+  }
+}
