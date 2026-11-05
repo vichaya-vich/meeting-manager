@@ -3,3 +3,6 @@ dist
 build
 coverage
 package-lock.yaml
+.github
+backend/src/generated/
+README.md
