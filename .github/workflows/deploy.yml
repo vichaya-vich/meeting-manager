@@ -8,6 +8,7 @@ jobs:
   database-migration:
     name: Database Migration
     runs-on: ubuntu-latest
+    environment: production
     defaults:
       run:
         working-directory: ./backend
@@ -37,6 +38,7 @@ jobs:
     name: Deploy Frontend to Vercel
     needs: database-migration
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - uses: actions/checkout@v6
         name: Step 1 - Checkout Code
