@@ -30,9 +30,12 @@ jobs:
     name: Deploy Backend to Render
     needs: database-migration
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - name: Step 1 - Trigger Render Deploy Hook
         run: curl -X Post "${{secrets.RENDER_DEPLOY_HOOK_URL}}"
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{secrets.RENDER_DEPLOY_HOOK_URL}}
         
   frontend-deploy:
     name: Deploy Frontend to Vercel
