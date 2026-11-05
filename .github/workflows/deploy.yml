@@ -1,0 +1,49 @@
+name: CD - Deploy
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  database-migration:
+    name: Database Migration
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    steps:
+      - uses: actions/checkout@v6
+        name: Step 1 - Checkout Code
+      - uses: actions/setup-node@v7
+        name: Step 2 - Use Node.js
+        with:
+          node-version: '24.x'
+      - name: Step 3 - Install Dependencies
+        run: npm ci
+      - name: Step 4 - Run Prisma Migrate Deploy
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{secrets.DATABASE_URL}}
+          
+  backend-deploy:
+    name: Deploy Backend to Render
+    needs: database-migration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Step 1 - Trigger Render Deploy Hook
+        run: curl -X Post "${{secrets.RENDER_DEPLOY_HOOK_URL}}"
+        
+  frontend-deploy:
+    name: Deploy Frontend to Vercel
+    needs: database-migration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        name: Step 1 - Checkout Code
+      - name: Step 2 - Install Vercel CLI
+        run: npm install --global vercel@latest
+      - name: Step 3 - Deploy to Vercel
+        run: vercel deploy --prod --token=${{secrets.VERCEL_TOKEN}} --cwd=./frontend
+        env:
+          VERCEL_ORG_ID: ${{secrets.VERCEL_ORG_ID}}
+          VERCEL_PROJECT_ID: ${{secrets.VERCEL_PROJECT_ID}}
