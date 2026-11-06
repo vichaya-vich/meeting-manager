@@ -7,3 +7,44 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum MeetingType {
+  ONLINE
+  OFFLINE
+}
+
+enum MeetingStatus {
+  PENDING
+  CONFIRM
+  CANCELED
+}
+
+model Meeting {
+  id          Int       @id @default(autoincrement())
+  type        MeetingType
+  status      MeetingStatus
+  startAt     DateTime  @map("start_at")  @db.Timestamptz(6)
+  endAt       DateTime  @map("end_at")    @db.Timestamptz(6)
+  role        String
+  note        String?
+  feedback    String?
+  candidateId Int       @map("candidate_id")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  candidate   Candidate @relation(fields: [candidateId], references: [id])
+
+  @@index([startAt])
+  @@index([status, startAt])
+  @@index([candidateId, role, startAt])
+  @@map("meetings")
+}
+
+model Candidate {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+
+  meetings    Meeting[]
+
+  @@map("candidates")
+}
