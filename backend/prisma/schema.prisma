@@ -41,8 +41,9 @@ model Meeting {
 }
 
 model Candidate {
-  id          Int       @id @default(autoincrement())
-  name        String    @unique
+  id              Int       @id @default(autoincrement())
+  name            String
+  nameNormalized  String    @unique @map("name_normalized")
 
   meetings    Meeting[]
 
