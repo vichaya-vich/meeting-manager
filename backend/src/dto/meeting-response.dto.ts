@@ -1,4 +1,4 @@
-import { MeetingStatus, MeetingType } from '../../generated/prisma/client'
+import { MeetingStatus, MeetingType } from '../generated/prisma/client'
 
 export interface MeetingResponseDto {
   id: number

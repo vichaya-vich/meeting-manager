@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { Role } from '../enums/role.enum'
 import { MeetingType } from '../generated/prisma/client'
+import { truncateToMinute } from '../utils/date.util'
 
 export const meetingCreateSchema = z.object({
   body: z
@@ -13,10 +14,11 @@ export const meetingCreateSchema = z.object({
       type: z.enum(MeetingType, 'invalid meeting type'),
       startAt: z.coerce
         .date('startAt must be a valid date')
-        .refine((date) => date.getTime() > Date.now(), {
+        .transform(truncateToMinute)
+        .refine((date) => date.getTime() >= truncateToMinute(new Date()).getTime(), {
           message: 'startAt must not be in the past',
         }),
-      endAt: z.coerce.date('endAt must be a valid date'),
+      endAt: z.coerce.date('endAt must be a valid date').transform(truncateToMinute),
       role: z.enum(Role, 'invalid role'),
       note: z
         .string('note must be a string')
