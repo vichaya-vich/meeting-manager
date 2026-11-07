@@ -3,7 +3,7 @@ import { MeetingController } from '../controllers/meeting.controller'
 import { PrismaClient } from '../generated/prisma/client'
 import { validateData } from '../middlewares/validation.middleware'
 import { MeetingRepository } from '../repositories/meeting.repository'
-import { meetingCreateSchema } from '../schemas/meeting.schema'
+import { meetingCreateSchema } from '../schemas/meeting-create.schema'
 import { MeetingService } from '../services/meeting.service'
 
 export const meetingRouter = (prisma: PrismaClient) => {

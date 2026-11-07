@@ -11,7 +11,8 @@ export class MeetingController {
     next,
   ): Promise<void> => {
     try {
-      response.status(201).json(await this.meetingService.createMeeting(request.body))
+      const result = await this.meetingService.createMeeting(request.body)
+      response.status(201).json(result)
     } catch (error) {
       next(error)
     }

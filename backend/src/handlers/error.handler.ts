@@ -15,8 +15,8 @@ export function errorHandler(
   const requestDetail = { method: request.method, url: request.originalUrl }
 
   if (error instanceof SyntaxError && 'body' in error) {
-    console.warn('[400] Invalid JSON', requestDetail)
-    return response.status(400).json({ error: 'Invalid JSON' })
+    console.warn('[400] Invalid Syntax', requestDetail)
+    return response.status(400).json({ error: 'Invalid Syntax' })
   }
 
   if (error instanceof ZodError) {

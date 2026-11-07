@@ -17,6 +17,5 @@
     "outDir": "dist",
     "rootDir": "src"
   },
-  "include": ["src", "prisma"],
-  "exclude": ["src/**/*.test.ts"]
+  "include": ["src", "prisma"]
 }
