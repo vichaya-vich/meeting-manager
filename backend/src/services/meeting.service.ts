@@ -9,7 +9,7 @@ export class MeetingService {
   async createMeeting(request: MeetingCreateRequestDto): Promise<MeetingResponseDto> {
     const meeting = await this.meetingRepository.createWithCandidate({
       ...request,
-      role: request.role.toString(),
+      role: request.role,
       status: MeetingStatus.PENDING,
     })
 

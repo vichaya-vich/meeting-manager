@@ -1,10 +1,18 @@
 import express from 'express'
+import { MeetingController } from '../controllers/meeting.controller'
+import { PrismaClient } from '../generated/prisma/client'
 import { validateData } from '../middlewares/validation.middleware'
+import { MeetingRepository } from '../repositories/meeting.repository'
 import { meetingCreateSchema } from '../schemas/meeting.schema'
-import * as meetingController from '../controllers/meeting.controller'
+import { MeetingService } from '../services/meeting.service'
 
-const meetingRouter = express.Router()
+export const meetingRouter = (prisma: PrismaClient) => {
+  const router = express.Router()
+  const repository = new MeetingRepository(prisma)
+  const service = new MeetingService(repository)
+  const controller = new MeetingController(service)
 
-meetingRouter.post('/', validateData(meetingCreateSchema), meetingController.createMeeting)
+  router.post('/', validateData(meetingCreateSchema), controller.createMeeting)
 
-export default meetingRouter
+  return router
+}
