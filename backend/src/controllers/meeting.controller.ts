@@ -32,7 +32,7 @@ export class MeetingController {
     }
   }
 
-  cancelMeeting: RequestHandler<{ id: string }, {}, {}> = async (
+  cancelMeeting: RequestHandler<{ id: string }> = async (
     request,
     response,
     next,
@@ -54,6 +54,19 @@ export class MeetingController {
     try {
       const id = Number(request.params.id)
       const result = await this.meetingService.feedback(id, request.body.feedback)
+      response.status(200).json(result)
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  getMeetings: RequestHandler<{}, {}, {}, { scope: string }> = async (
+    request,
+    response,
+    next,
+  ): Promise<void> => {
+    try {
+      const result = await this.meetingService.findMeetings(request.query.scope)
       response.status(200).json(result)
     } catch (error) {
       next(error)

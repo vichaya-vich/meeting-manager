@@ -19,3 +19,10 @@ export interface UpdateMeetingWithCandidateInput {
   role: string
   note?: string
 }
+
+export interface MeetingsParams {
+  statuses?: MeetingStatus[]
+  endBefore?: Date
+  endAfter?: Date
+  candidateId?: number
+}

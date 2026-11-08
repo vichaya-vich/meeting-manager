@@ -1,7 +1,10 @@
 import { MeetingCreateRequestDto, MeetingUpdateRequestDto } from '../dto/meeting-request.dto'
 import { MeetingResponseDto, MeetingUpdateResponseDto } from '../dto/meeting-response.dto'
+import { MeetingScope } from '../enums/meeting-scope.enum'
+import { Prisma } from '../generated/prisma/client'
 import { MeetingStatus } from '../generated/prisma/enums'
 import { ApplicationError } from '../handlers/error.handler'
+import { MeetingsParams } from '../interfaces/meeting.interface'
 import { MeetingRepository } from '../repositories/meeting.repository'
 import { truncateToMinute } from '../utils/date.util'
 
@@ -97,5 +100,44 @@ export class MeetingService {
       id: meeting.id,
       updatedAt: meeting.updatedAt,
     }
+  }
+
+  async findMeetings(scope: string): Promise<MeetingResponseDto[]> {
+    const currentDate = new Date()
+    const statuses = [MeetingStatus.PENDING, MeetingStatus.CONFIRM]
+    let params: MeetingsParams, orderBy: Prisma.MeetingOrderByWithRelationInput
+
+    switch (scope) {
+      case MeetingScope.UPCOMING: {
+        params = { statuses, endAfter: currentDate }
+        orderBy = { endAt: 'asc' }
+        break
+      }
+      case MeetingScope.FINISHED: {
+        params = { statuses, endBefore: currentDate }
+        orderBy = { endAt: 'desc' }
+        break
+      }
+      default: {
+        throw new ApplicationError('Invalid Meeting Scope')
+      }
+    }
+
+    const meetings = await this.meetingRepository.findManyWithCandidate(params, orderBy)
+
+    return meetings.map((meeting) => ({
+      id: meeting.id,
+      name: meeting.candidate.name,
+      candidateId: meeting.candidate.id,
+      type: meeting.type,
+      status: meeting.status,
+      startAt: meeting.startAt,
+      endAt: meeting.endAt,
+      role: meeting.role,
+      note: meeting.note,
+      feedback: meeting.feedback,
+      createdAt: meeting.createdAt,
+      updatedAt: meeting.updatedAt,
+    }))
   }
 }

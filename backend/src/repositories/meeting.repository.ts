@@ -1,6 +1,7 @@
 import { Prisma, PrismaClient } from '../generated/prisma/client'
 import {
   CreateMeetingWithCandidateInput,
+  MeetingsParams,
   UpdateMeetingWithCandidateInput,
 } from '../interfaces/meeting.interface'
 import { trimAndLowercase } from '../utils/string.util'
@@ -10,6 +11,31 @@ export class MeetingRepository {
 
   findById(id: number) {
     return this.prisma.meeting.findUnique({ where: { id } })
+  }
+
+  findManyWithCandidate(params: MeetingsParams, orderBy: Prisma.MeetingOrderByWithRelationInput) {
+    const where: Prisma.MeetingWhereInput = {}
+
+    if (params.statuses?.length) {
+      where.status = { in: params.statuses }
+    }
+
+    if (params.endBefore || params.endAfter) {
+      where.endAt = {
+        ...(params.endBefore && { lte: params.endBefore }),
+        ...(params.endAfter && { gt: params.endAfter }),
+      }
+    }
+
+    if (params.candidateId !== undefined) {
+      where.candidateId = params.candidateId
+    }
+
+    return this.prisma.meeting.findMany({
+      where,
+      include: { candidate: true },
+      orderBy,
+    })
   }
 
   createWithCandidate(input: CreateMeetingWithCandidateInput) {

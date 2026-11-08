@@ -10,6 +10,7 @@ export interface MeetingResponseDto {
   endAt: Date
   role: string
   note?: string | null
+  feedback?: string | null
   createdAt: Date
   updatedAt: Date
 }
