@@ -3,7 +3,7 @@ import { afterEach } from 'node:test'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import z from 'zod'
 import { Prisma } from '../generated/prisma/client'
-import { errorHandler } from './error.handler'
+import { ApplicationError, errorHandler } from './error.handler'
 
 describe('errorHandler', () => {
   const request = { method: 'POST', originalUrl: 'originalUrl1' } as Request
@@ -32,6 +32,15 @@ describe('errorHandler', () => {
 
     expect(next).toHaveBeenCalledWith(error)
     expect(response.status).not.toHaveBeenCalled()
+  })
+
+  test('should response status 400 when application error', () => {
+    const error = new ApplicationError('Application Error')
+
+    errorHandler(error, request, response, next)
+
+    expect(response.status).toHaveBeenCalledWith(400)
+    expect(response.json).toHaveBeenCalledWith({ error: 'Application Error' })
   })
 
   test('should response status 400 when request body is invalid', () => {
