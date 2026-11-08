@@ -1,5 +1,5 @@
 import { MeetingCreateRequestDto, MeetingUpdateRequestDto } from '../dto/meeting-request.dto'
-import { MeetingResponseDto } from '../dto/meeting-response.dto'
+import { MeetingResponseDto, MeetingUpdateResponseDto } from '../dto/meeting-response.dto'
 import { MeetingStatus } from '../generated/prisma/enums'
 import { ApplicationError } from '../handlers/error.handler'
 import { MeetingRepository } from '../repositories/meeting.repository'
@@ -57,6 +57,44 @@ export class MeetingService {
       role: meeting.role,
       note: meeting.note,
       createdAt: meeting.createdAt,
+      updatedAt: meeting.updatedAt,
+    }
+  }
+
+  async cancelMeeting(id: number): Promise<MeetingUpdateResponseDto> {
+    const existing = await this.meetingRepository.findById(id)
+    if (!existing) {
+      throw new ApplicationError('Meeting Not Found')
+    }
+
+    const currentDate = truncateToMinute(new Date()).getTime()
+    if (existing.status === MeetingStatus.CANCELED || currentDate > existing.endAt.getTime()) {
+      throw new ApplicationError('Not Allow to Cancel This Meeting')
+    }
+
+    const meeting = await this.meetingRepository.update(id, { status: MeetingStatus.CANCELED })
+
+    return {
+      id: meeting.id,
+      updatedAt: meeting.updatedAt,
+    }
+  }
+
+  async feedback(id: number, feedback: string): Promise<MeetingUpdateResponseDto> {
+    const existing = await this.meetingRepository.findById(id)
+    if (!existing) {
+      throw new ApplicationError('Meeting Not Found')
+    }
+
+    const currentDate = truncateToMinute(new Date()).getTime()
+    if (existing.status === MeetingStatus.CANCELED || currentDate <= existing.endAt.getTime()) {
+      throw new ApplicationError('Not Allow to Add Feedback')
+    }
+
+    const meeting = await this.meetingRepository.update(id, { feedback })
+
+    return {
+      id: meeting.id,
       updatedAt: meeting.updatedAt,
     }
   }

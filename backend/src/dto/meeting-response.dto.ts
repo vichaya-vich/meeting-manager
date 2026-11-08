@@ -13,3 +13,8 @@ export interface MeetingResponseDto {
   createdAt: Date
   updatedAt: Date
 }
+
+export interface MeetingUpdateResponseDto {
+  id: number
+  updatedAt: Date
+}

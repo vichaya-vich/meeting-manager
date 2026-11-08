@@ -1,4 +1,4 @@
-import { PrismaClient } from '../generated/prisma/client'
+import { Prisma, PrismaClient } from '../generated/prisma/client'
 import {
   CreateMeetingWithCandidateInput,
   UpdateMeetingWithCandidateInput,
@@ -47,5 +47,9 @@ export class MeetingRepository {
       },
       include: { candidate: true },
     })
+  }
+
+  update(id: number, input: Prisma.MeetingUpdateInput) {
+    return this.prisma.meeting.update({ where: { id }, data: input })
   }
 }
