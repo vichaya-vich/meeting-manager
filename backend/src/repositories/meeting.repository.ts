@@ -1,5 +1,8 @@
 import { PrismaClient } from '../generated/prisma/client'
-import { CreateMeetingWithCandidateInput } from '../interfaces/meeting.interface'
+import {
+  CreateMeetingWithCandidateInput,
+  UpdateMeetingWithCandidateInput,
+} from '../interfaces/meeting.interface'
 import { trimAndLowercase } from '../utils/string.util'
 
 export class MeetingRepository {
@@ -10,6 +13,25 @@ export class MeetingRepository {
     const nameNormalized = trimAndLowercase(name)
 
     return this.prisma.meeting.create({
+      data: {
+        ...meeting,
+        candidate: {
+          connectOrCreate: {
+            where: { nameNormalized },
+            create: { name, nameNormalized },
+          },
+        },
+      },
+      include: { candidate: true },
+    })
+  }
+
+  updateWithCandidate(id: number, input: UpdateMeetingWithCandidateInput) {
+    const { name, ...meeting } = input
+    const nameNormalized = trimAndLowercase(name)
+
+    return this.prisma.meeting.update({
+      where: { id },
       data: {
         ...meeting,
         candidate: {

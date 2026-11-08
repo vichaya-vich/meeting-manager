@@ -9,3 +9,13 @@ export interface CreateMeetingWithCandidateInput {
   role: string
   note?: string
 }
+
+export interface UpdateMeetingWithCandidateInput {
+  name: string
+  type: MeetingType
+  status: MeetingStatus
+  startAt: Date
+  endAt: Date
+  role: string
+  note?: string
+}

@@ -1,5 +1,5 @@
 import { Role } from '../enums/role.enum'
-import { MeetingType } from '../generated/prisma/client'
+import { MeetingStatus, MeetingType } from '../generated/prisma/client'
 
 export interface MeetingCreateRequestDto {
   name: string
@@ -8,4 +8,14 @@ export interface MeetingCreateRequestDto {
   endAt: Date
   role: Role
   note?: string
+}
+
+export interface MeetingUpdateRequestDto {
+  name: string
+  type: MeetingType
+  startAt: Date
+  endAt: Date
+  role: Role
+  note?: string
+  status: MeetingStatus
 }
