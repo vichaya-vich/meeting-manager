@@ -37,6 +37,14 @@ describe('meetingCreateSchema', () => {
     }
   })
 
+  test.for([
+    ['name size is 1', 'a'],
+    ['name size is 50', 'a'.repeat(50)],
+  ])('should validate pass when %s', ([_label, name]) => {
+    const result = meetingCreateSchema.safeParse({ body: { ...body, name } })
+    expect(result.success).toBe(true)
+  })
+
   test('should validate pass when startAt is today', () => {
     const result = meetingCreateSchema.safeParse({
       body: { ...body, startAt: new Date('2026-11-08T15:00:20+07:00') },
@@ -48,6 +56,7 @@ describe('meetingCreateSchema', () => {
     ['note is undefined', undefined],
     ['note is blank', ''],
     ['note is whitespace', '   '],
+    ['note size is 500', 'a'.repeat(500)],
   ])('should validate pass when %s', ([_label, note]) => {
     const result = meetingCreateSchema.safeParse({ body: { ...body, note } })
     expect(result.success).toBe(true)

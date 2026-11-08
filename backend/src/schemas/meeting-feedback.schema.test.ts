@@ -16,6 +16,11 @@ describe('meetingFeedbackSchema', () => {
     }
   })
 
+  test('should validate pass when feedback size is 500', () => {
+    const result = meetingFeedbackSchema.safeParse({ params, body: { feedback: 'a'.repeat(500) } })
+    expect(result.success).toBe(true)
+  })
+
   test.for([
     ['id is undefined', undefined],
     ['id is not a number', 'a'],

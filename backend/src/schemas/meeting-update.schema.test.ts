@@ -40,6 +40,14 @@ describe('meetingUpdateSchema', () => {
     }
   })
 
+  test.for([
+    ['name size is 1', 'a'],
+    ['name size is 50', 'a'.repeat(50)],
+  ])('should validate pass when %s', ([_label, name]) => {
+    const result = meetingUpdateSchema.safeParse({ params, body: { ...body, name } })
+    expect(result.success).toBe(true)
+  })
+
   test('should validate pass when startAt is today', () => {
     const result = meetingUpdateSchema.safeParse({
       params,
@@ -52,6 +60,7 @@ describe('meetingUpdateSchema', () => {
     ['note is undefined', undefined],
     ['note is blank', ''],
     ['note is whitespace', '   '],
+    ['note size is 500', 'a'.repeat(500)],
   ])('should validate pass when %s', ([_label, note]) => {
     const result = meetingUpdateSchema.safeParse({ params, body: { ...body, note } })
     expect(result.success).toBe(true)
