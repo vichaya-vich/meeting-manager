@@ -10,6 +10,7 @@ describe('MeetingController', () => {
     updateMeeting: Mock
     cancelMeeting: Mock
     feedback: Mock
+    findMeetings: Mock
   }
   let controller: MeetingController
   let response: Response
@@ -21,6 +22,7 @@ describe('MeetingController', () => {
       updateMeeting: vi.fn(),
       cancelMeeting: vi.fn(),
       feedback: vi.fn(),
+      findMeetings: vi.fn(),
     }
     controller = new MeetingController(meetingService as unknown as MeetingService)
 
@@ -92,7 +94,7 @@ describe('MeetingController', () => {
 
   describe('cancelMeeting', () => {
     const params = { id: '1' }
-    const request = { params } as Request<{ id: string }, {}, {}>
+    const request = { params } as Request<{ id: string }>
 
     test('should response 200 with response data', async () => {
       const updated = { id: 1 }
@@ -140,6 +142,34 @@ describe('MeetingController', () => {
       meetingService.feedback.mockRejectedValue(error)
 
       await controller.feedbackMeeting(request, response, next)
+
+      expect(next).toHaveBeenCalledWith(error)
+      expect(response.status).not.toHaveBeenCalled()
+      expect(response.json).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('getMeetings', () => {
+    const query = { scope: 'scope1' }
+    const request = { query } as Request<{}, {}, {}, { scope: string }>
+
+    test('should response 200 with response data', async () => {
+      const meetings = [{ id: 1 }]
+      meetingService.findMeetings.mockResolvedValue(meetings)
+
+      await controller.getMeetings(request, response, next)
+
+      expect(meetingService.findMeetings).toHaveBeenCalledWith('scope1')
+      expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.json).toHaveBeenCalledWith(meetings)
+      expect(next).not.toHaveBeenCalled()
+    })
+
+    test('should pass error to next when service error', async () => {
+      const error = new Error('error')
+      meetingService.findMeetings.mockRejectedValue(error)
+
+      await controller.getMeetings(request, response, next)
 
       expect(next).toHaveBeenCalledWith(error)
       expect(response.status).not.toHaveBeenCalled()

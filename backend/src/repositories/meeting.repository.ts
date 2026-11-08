@@ -6,6 +6,12 @@ import {
 } from '../interfaces/meeting.interface'
 import { trimAndLowercase } from '../utils/string.util'
 
+const meetingWithCandidate = {
+  include: { candidate: true },
+}
+
+export type MeetingWithCandidate = Prisma.MeetingGetPayload<typeof meetingWithCandidate>
+
 export class MeetingRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
@@ -31,11 +37,7 @@ export class MeetingRepository {
       where.candidateId = params.candidateId
     }
 
-    return this.prisma.meeting.findMany({
-      where,
-      include: { candidate: true },
-      orderBy,
-    })
+    return this.prisma.meeting.findMany({ ...meetingWithCandidate, where, orderBy })
   }
 
   createWithCandidate(input: CreateMeetingWithCandidateInput) {
@@ -52,7 +54,7 @@ export class MeetingRepository {
           },
         },
       },
-      include: { candidate: true },
+      ...meetingWithCandidate,
     })
   }
 
@@ -71,7 +73,7 @@ export class MeetingRepository {
           },
         },
       },
-      include: { candidate: true },
+      ...meetingWithCandidate,
     })
   }
 

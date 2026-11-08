@@ -11,6 +11,7 @@ describe('MeetingRepository', () => {
   let prisma: {
     meeting: {
       findUnique: Mock
+      findMany: Mock
       create: Mock
       update: Mock
     }
@@ -21,6 +22,7 @@ describe('MeetingRepository', () => {
     prisma = {
       meeting: {
         findUnique: vi.fn(),
+        findMany: vi.fn(),
         create: vi.fn(),
         update: vi.fn(),
       },
@@ -40,6 +42,83 @@ describe('MeetingRepository', () => {
 
       expect(result).toEqual(meeting)
       expect(prisma.meeting.findUnique).toHaveBeenCalledWith({ where: { id: 1 } })
+    })
+  })
+
+  describe('findManyWithCandidate', () => {
+    const meeting = { name: 'John Doe' }
+
+    test('should return list of meeting when where parameters are empty', async () => {
+      prisma.meeting.findMany.mockResolvedValue([meeting])
+
+      const result = await repository.findManyWithCandidate({}, { id: 'asc' })
+
+      expect(result.length).toBe(1)
+      expect(result[0]).toBe(meeting)
+      expect(prisma.meeting.findMany).toHaveBeenCalledWith({
+        where: {},
+        include: { candidate: true },
+        orderBy: { id: 'asc' },
+      })
+    })
+
+    test('should return list of meeting when find meeting by statuses', async () => {
+      const statuses = [MeetingStatus.CONFIRM]
+      prisma.meeting.findMany.mockResolvedValue([meeting])
+
+      const result = await repository.findManyWithCandidate({ statuses }, { id: 'asc' })
+
+      expect(result.length).toBe(1)
+      expect(result[0]).toBe(meeting)
+      expect(prisma.meeting.findMany).toHaveBeenCalledWith({
+        where: { status: { in: statuses } },
+        include: { candidate: true },
+        orderBy: { id: 'asc' },
+      })
+    })
+
+    test('should return list of meeting when find meeting by endBefore', async () => {
+      const endBefore = new Date()
+      prisma.meeting.findMany.mockResolvedValue([meeting])
+
+      const result = await repository.findManyWithCandidate({ endBefore }, { id: 'asc' })
+
+      expect(result.length).toBe(1)
+      expect(result[0]).toBe(meeting)
+      expect(prisma.meeting.findMany).toHaveBeenCalledWith({
+        where: { endAt: { lte: endBefore } },
+        include: { candidate: true },
+        orderBy: { id: 'asc' },
+      })
+    })
+
+    test('should return list of meeting when find meeting by endAfter', async () => {
+      const endAfter = new Date()
+      prisma.meeting.findMany.mockResolvedValue([meeting])
+
+      const result = await repository.findManyWithCandidate({ endAfter }, { id: 'asc' })
+
+      expect(result.length).toBe(1)
+      expect(result[0]).toBe(meeting)
+      expect(prisma.meeting.findMany).toHaveBeenCalledWith({
+        where: { endAt: { gt: endAfter } },
+        include: { candidate: true },
+        orderBy: { id: 'asc' },
+      })
+    })
+
+    test('should return list of meeting when find meeting by candidateId', async () => {
+      prisma.meeting.findMany.mockResolvedValue([meeting])
+
+      const result = await repository.findManyWithCandidate({ candidateId: 1 }, { id: 'asc' })
+
+      expect(result.length).toBe(1)
+      expect(result[0]).toBe(meeting)
+      expect(prisma.meeting.findMany).toHaveBeenCalledWith({
+        where: { candidateId: 1 },
+        include: { candidate: true },
+        orderBy: { id: 'asc' },
+      })
     })
   })
 

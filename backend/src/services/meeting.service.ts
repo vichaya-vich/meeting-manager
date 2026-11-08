@@ -5,7 +5,7 @@ import { Prisma } from '../generated/prisma/client'
 import { MeetingStatus } from '../generated/prisma/enums'
 import { ApplicationError } from '../handlers/error.handler'
 import { MeetingsParams } from '../interfaces/meeting.interface'
-import { MeetingRepository } from '../repositories/meeting.repository'
+import { MeetingRepository, MeetingWithCandidate } from '../repositories/meeting.repository'
 import { truncateToMinute } from '../utils/date.util'
 
 export class MeetingService {
@@ -17,21 +17,7 @@ export class MeetingService {
       status: MeetingStatus.PENDING,
     })
 
-    const { candidate } = meeting
-
-    return {
-      id: meeting.id,
-      name: candidate.name,
-      candidateId: candidate.id,
-      type: meeting.type,
-      status: meeting.status,
-      startAt: meeting.startAt,
-      endAt: meeting.endAt,
-      role: meeting.role,
-      note: meeting.note,
-      createdAt: meeting.createdAt,
-      updatedAt: meeting.updatedAt,
-    }
+    return this.mappingMeetingResponse(meeting)
   }
 
   async updateMeeting(id: number, request: MeetingUpdateRequestDto): Promise<MeetingResponseDto> {
@@ -47,21 +33,7 @@ export class MeetingService {
 
     const meeting = await this.meetingRepository.updateWithCandidate(id, request)
 
-    const { candidate } = meeting
-
-    return {
-      id: meeting.id,
-      name: candidate.name,
-      candidateId: candidate.id,
-      type: meeting.type,
-      status: meeting.status,
-      startAt: meeting.startAt,
-      endAt: meeting.endAt,
-      role: meeting.role,
-      note: meeting.note,
-      createdAt: meeting.createdAt,
-      updatedAt: meeting.updatedAt,
-    }
+    return this.mappingMeetingResponse(meeting)
   }
 
   async cancelMeeting(id: number): Promise<MeetingUpdateResponseDto> {
@@ -124,11 +96,16 @@ export class MeetingService {
     }
 
     const meetings = await this.meetingRepository.findManyWithCandidate(params, orderBy)
+    return meetings.map(this.mappingMeetingResponse)
+  }
 
-    return meetings.map((meeting) => ({
+  private mappingMeetingResponse(meeting: MeetingWithCandidate): MeetingResponseDto {
+    const { candidate } = meeting
+
+    return {
       id: meeting.id,
-      name: meeting.candidate.name,
-      candidateId: meeting.candidate.id,
+      name: candidate.name,
+      candidateId: candidate.id,
       type: meeting.type,
       status: meeting.status,
       startAt: meeting.startAt,
@@ -138,6 +115,6 @@ export class MeetingService {
       feedback: meeting.feedback,
       createdAt: meeting.createdAt,
       updatedAt: meeting.updatedAt,
-    }))
+    }
   }
 }

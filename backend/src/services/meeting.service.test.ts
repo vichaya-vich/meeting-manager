@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, Mock, test, vi } from 'vitest'
 import { MeetingCreateRequestDto, MeetingUpdateRequestDto } from '../dto/meeting-request.dto'
+import { MeetingScope } from '../enums/meeting-scope.enum'
 import { Role } from '../enums/role.enum'
 import { MeetingStatus, MeetingType } from '../generated/prisma/client'
 import { ApplicationError } from '../handlers/error.handler'
@@ -9,6 +10,7 @@ import { MeetingService } from '../services/meeting.service'
 describe('MeetingService', () => {
   let meetingRepository: {
     findById: Mock
+    findManyWithCandidate: Mock
     createWithCandidate: Mock
     updateWithCandidate: Mock
     update: Mock
@@ -18,6 +20,7 @@ describe('MeetingService', () => {
   beforeEach(() => {
     meetingRepository = {
       findById: vi.fn(),
+      findManyWithCandidate: vi.fn(),
       createWithCandidate: vi.fn(),
       updateWithCandidate: vi.fn(),
       update: vi.fn(),
@@ -284,6 +287,71 @@ describe('MeetingService', () => {
       )
       expect(meetingRepository.findById).toHaveBeenCalledWith(1)
       expect(meetingRepository.update).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('findMeetings', () => {
+    const date = new Date('2026-11-08T10:00:00+07:00')
+    const statuses = [MeetingStatus.PENDING, MeetingStatus.CONFIRM]
+    const meeting = {
+      id: 1,
+      note: 'note',
+      feedback: 'feedback',
+      type: MeetingType.OFFLINE,
+      status: MeetingStatus.PENDING,
+      startAt: new Date('2026-11-07T12:00:00+07:00'),
+      endAt: new Date('2026-11-07T15:00:00+07:00'),
+      role: Role.BACKEND,
+      createdAt: date,
+      updatedAt: date,
+      candidate: { name: 'name', id: 3 },
+    }
+    const expected = {
+      id: meeting.id,
+      name: 'name',
+      candidateId: 3,
+      type: meeting.type,
+      status: meeting.status,
+      startAt: meeting.startAt,
+      endAt: meeting.endAt,
+      role: meeting.role,
+      note: meeting.note,
+      feedback: meeting.feedback,
+      createdAt: meeting.createdAt,
+      updatedAt: meeting.updatedAt,
+    }
+
+    test('should return upcoming meeting when scope is upcoming', async () => {
+      meetingRepository.findManyWithCandidate.mockResolvedValue([meeting])
+
+      const result = await service.findMeetings(MeetingScope.UPCOMING)
+
+      expect(result.length).toBe(1)
+      expect(result[0]).toEqual(expected)
+      expect(meetingRepository.findManyWithCandidate).toHaveBeenCalledWith(
+        { statuses, endAfter: date },
+        { endAt: 'asc' },
+      )
+    })
+
+    test('should return upcoming meeting when scope is finished', async () => {
+      meetingRepository.findManyWithCandidate.mockResolvedValue([meeting])
+
+      const result = await service.findMeetings(MeetingScope.FINISHED)
+
+      expect(result.length).toBe(1)
+      expect(result[0]).toEqual(expected)
+      expect(meetingRepository.findManyWithCandidate).toHaveBeenCalledWith(
+        { statuses, endBefore: date },
+        { endAt: 'desc' },
+      )
+    })
+
+    test('should throw error when scope is invalid', async () => {
+      await expect(service.findMeetings('NOT_SCOPE')).rejects.toThrow(
+        new ApplicationError('Invalid Meeting Scope'),
+      )
+      expect(meetingRepository.findManyWithCandidate).not.toHaveBeenCalled()
     })
   })
 })
