@@ -8,6 +8,8 @@ describe('MeetingController', () => {
   let meetingService: {
     createMeeting: Mock
     updateMeeting: Mock
+    cancelMeeting: Mock
+    feedback: Mock
   }
   let controller: MeetingController
   let response: Response
@@ -17,6 +19,8 @@ describe('MeetingController', () => {
     meetingService = {
       createMeeting: vi.fn(),
       updateMeeting: vi.fn(),
+      cancelMeeting: vi.fn(),
+      feedback: vi.fn(),
     }
     controller = new MeetingController(meetingService as unknown as MeetingService)
 
@@ -79,6 +83,63 @@ describe('MeetingController', () => {
       meetingService.updateMeeting.mockRejectedValue(error)
 
       await controller.updateMeeting(request, response, next)
+
+      expect(next).toHaveBeenCalledWith(error)
+      expect(response.status).not.toHaveBeenCalled()
+      expect(response.json).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('cancelMeeting', () => {
+    const params = { id: '1' }
+    const request = { params } as Request<{ id: string }, {}, {}>
+
+    test('should response 200 with response data', async () => {
+      const updated = { id: 1 }
+      meetingService.cancelMeeting.mockResolvedValue(updated)
+
+      await controller.cancelMeeting(request, response, next)
+
+      expect(meetingService.cancelMeeting).toHaveBeenCalledWith(1)
+      expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.json).toHaveBeenCalledWith(updated)
+      expect(next).not.toHaveBeenCalled()
+    })
+
+    test('should pass error to next when service error', async () => {
+      const error = new Error('error')
+      meetingService.cancelMeeting.mockRejectedValue(error)
+
+      await controller.cancelMeeting(request, response, next)
+
+      expect(next).toHaveBeenCalledWith(error)
+      expect(response.status).not.toHaveBeenCalled()
+      expect(response.json).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('feedbackMeeting', () => {
+    const params = { id: '1' }
+    const body = { feedback: 'feedback' }
+    const request = { params, body } as Request<{ id: string }, {}, { feedback: string }>
+
+    test('should response 200 with response data', async () => {
+      const updated = { id: 1 }
+      meetingService.feedback.mockResolvedValue(updated)
+
+      await controller.feedbackMeeting(request, response, next)
+
+      expect(meetingService.feedback).toHaveBeenCalledWith(1, body.feedback)
+      expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.json).toHaveBeenCalledWith(updated)
+      expect(next).not.toHaveBeenCalled()
+    })
+
+    test('should pass error to next when service error', async () => {
+      const error = new Error('error')
+      meetingService.feedback.mockRejectedValue(error)
+
+      await controller.feedbackMeeting(request, response, next)
 
       expect(next).toHaveBeenCalledWith(error)
       expect(response.status).not.toHaveBeenCalled()

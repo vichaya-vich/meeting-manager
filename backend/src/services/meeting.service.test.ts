@@ -11,6 +11,7 @@ describe('MeetingService', () => {
     findById: Mock
     createWithCandidate: Mock
     updateWithCandidate: Mock
+    update: Mock
   }
   let service: MeetingService
 
@@ -19,6 +20,7 @@ describe('MeetingService', () => {
       findById: vi.fn(),
       createWithCandidate: vi.fn(),
       updateWithCandidate: vi.fn(),
+      update: vi.fn(),
     }
     service = new MeetingService(meetingRepository as unknown as MeetingRepository)
     vi.useFakeTimers().setSystemTime(new Date('2026-11-08T10:00:00+07:00'))
@@ -155,6 +157,133 @@ describe('MeetingService', () => {
       )
       expect(meetingRepository.findById).toHaveBeenCalledWith(1)
       expect(meetingRepository.updateWithCandidate).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('cancelMeeting', () => {
+    const date = new Date()
+    const meeting = {
+      id: 1,
+      note: 'note',
+      type: MeetingType.OFFLINE,
+      status: MeetingStatus.PENDING,
+      startAt: new Date('2026-11-08T12:00:00+07:00'),
+      endAt: new Date('2026-11-08T15:00:00+07:00'),
+      role: Role.BACKEND,
+      createdAt: date,
+      updatedAt: date,
+      candidate: { name: 'name', id: 3 },
+    }
+
+    test('should cancel meeting', async () => {
+      meetingRepository.findById.mockResolvedValue(meeting)
+      meetingRepository.update.mockResolvedValue(meeting)
+
+      const result = await service.cancelMeeting(1)
+
+      expect(meetingRepository.findById).toHaveBeenCalledWith(1)
+      expect(meetingRepository.update).toHaveBeenCalledWith(1, { status: MeetingStatus.CANCELED })
+      expect(result).toEqual({
+        id: meeting.id,
+        updatedAt: meeting.updatedAt,
+      })
+    })
+
+    test('should throw error when existing meeting is not found', async () => {
+      meetingRepository.findById.mockResolvedValue(undefined)
+
+      await expect(service.cancelMeeting(1)).rejects.toThrow(
+        new ApplicationError('Meeting Not Found'),
+      )
+      expect(meetingRepository.findById).toHaveBeenCalledWith(1)
+      expect(meetingRepository.update).not.toHaveBeenCalled()
+    })
+
+    test('should throw error when existing meeting status is CANCELED', async () => {
+      meetingRepository.findById.mockResolvedValue({ ...meeting, status: MeetingStatus.CANCELED })
+
+      await expect(service.cancelMeeting(1)).rejects.toThrow(
+        new ApplicationError('Not Allow to Cancel This Meeting'),
+      )
+      expect(meetingRepository.findById).toHaveBeenCalledWith(1)
+      expect(meetingRepository.update).not.toHaveBeenCalled()
+    })
+
+    test('should throw error when existing meeting is ended', async () => {
+      meetingRepository.findById.mockResolvedValue({
+        ...meeting,
+        endAt: new Date('2026-11-08T09:00:00+07:00'),
+      })
+
+      await expect(service.cancelMeeting(1)).rejects.toThrow(
+        new ApplicationError('Not Allow to Cancel This Meeting'),
+      )
+      expect(meetingRepository.findById).toHaveBeenCalledWith(1)
+      expect(meetingRepository.update).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('feedback', () => {
+    const feedback = 'feedback'
+    const date = new Date()
+    const meeting = {
+      id: 1,
+      note: 'note',
+      type: MeetingType.OFFLINE,
+      status: MeetingStatus.PENDING,
+      startAt: new Date('2026-11-07T12:00:00+07:00'),
+      endAt: new Date('2026-11-07T15:00:00+07:00'),
+      role: Role.BACKEND,
+      createdAt: date,
+      updatedAt: date,
+      candidate: { name: 'name', id: 3 },
+    }
+
+    test('should update existing meeting', async () => {
+      meetingRepository.findById.mockResolvedValue(meeting)
+      meetingRepository.update.mockResolvedValue(meeting)
+
+      const result = await service.feedback(1, feedback)
+
+      expect(meetingRepository.findById).toHaveBeenCalledWith(1)
+      expect(meetingRepository.update).toHaveBeenCalledWith(1, { feedback })
+      expect(result).toEqual({
+        id: meeting.id,
+        updatedAt: meeting.updatedAt,
+      })
+    })
+
+    test('should throw error when existing meeting is not found', async () => {
+      meetingRepository.findById.mockResolvedValue(undefined)
+
+      await expect(service.feedback(1, feedback)).rejects.toThrow(
+        new ApplicationError('Meeting Not Found'),
+      )
+      expect(meetingRepository.findById).toHaveBeenCalledWith(1)
+      expect(meetingRepository.update).not.toHaveBeenCalled()
+    })
+
+    test('should throw error when existing meeting status is CANCELED', async () => {
+      meetingRepository.findById.mockResolvedValue({ ...meeting, status: MeetingStatus.CANCELED })
+
+      await expect(service.feedback(1, feedback)).rejects.toThrow(
+        new ApplicationError('Not Allow to Add Feedback'),
+      )
+      expect(meetingRepository.findById).toHaveBeenCalledWith(1)
+      expect(meetingRepository.update).not.toHaveBeenCalled()
+    })
+
+    test('should throw error when existing meeting is not ended', async () => {
+      meetingRepository.findById.mockResolvedValue({
+        ...meeting,
+        endAt: new Date('2026-11-08T17:00:00+07:00'),
+      })
+
+      await expect(service.feedback(1, feedback)).rejects.toThrow(
+        new ApplicationError('Not Allow to Add Feedback'),
+      )
+      expect(meetingRepository.findById).toHaveBeenCalledWith(1)
+      expect(meetingRepository.update).not.toHaveBeenCalled()
     })
   })
 })

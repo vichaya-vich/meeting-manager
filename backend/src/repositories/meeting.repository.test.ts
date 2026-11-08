@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, Mock, test, vi } from 'vitest'
 import { Role } from '../enums/role.enum'
-import { MeetingStatus, MeetingType, PrismaClient } from '../generated/prisma/client'
+import { MeetingStatus, MeetingType, Prisma, PrismaClient } from '../generated/prisma/client'
 import {
   CreateMeetingWithCandidateInput,
   UpdateMeetingWithCandidateInput,
@@ -133,6 +133,25 @@ describe('MeetingRepository', () => {
         },
         include: { candidate: true },
       })
+    })
+  })
+
+  describe('update', () => {
+    const date = new Date()
+    const input: Prisma.MeetingUpdateInput = { status: MeetingStatus.PENDING }
+    const update = {
+      id: 1,
+      status: MeetingStatus.PENDING,
+      updatedAt: date,
+    }
+
+    test('should update existing meeting and return updated data', async () => {
+      prisma.meeting.update.mockResolvedValue(update)
+
+      const result = await repository.update(1, input)
+
+      expect(result).toEqual(update)
+      expect(prisma.meeting.update).toHaveBeenCalledWith({ where: { id: 1 }, data: input })
     })
   })
 })
