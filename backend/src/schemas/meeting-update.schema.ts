@@ -3,6 +3,8 @@ import { Role } from '../enums/role.enum'
 import { MeetingStatus, MeetingType } from '../generated/prisma/client'
 import { truncateToMinute } from '../utils/date.util'
 
+const AllowedStatuses = [MeetingStatus.CONFIRM, MeetingStatus.PENDING]
+
 export const meetingUpdateSchema = z.object({
   params: z.object({ id: z.coerce.number('id is required').int().positive() }),
   body: z
@@ -26,9 +28,9 @@ export const meetingUpdateSchema = z.object({
         .trim()
         .max(500, 'note must be at most 500 characters')
         .optional(),
-      status: z.enum(MeetingStatus, 'invalid status'),
+      status: z.enum(AllowedStatuses, 'invalid status'),
     })
-    .refine(({ endAt, startAt }) => endAt > startAt, {
+    .refine(({ endAt, startAt }) => endAt.getTime() > startAt.getTime(), {
       message: 'endAt must be after startAt',
       path: ['endAt'],
     }),

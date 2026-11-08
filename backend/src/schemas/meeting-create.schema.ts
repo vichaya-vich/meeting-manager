@@ -26,7 +26,7 @@ export const meetingCreateSchema = z.object({
         .max(500, 'note must be at most 500 characters')
         .optional(),
     })
-    .refine(({ endAt, startAt }) => endAt > startAt, {
+    .refine(({ endAt, startAt }) => endAt.getTime() > startAt.getTime(), {
       message: 'endAt must be after startAt',
       path: ['endAt'],
     }),

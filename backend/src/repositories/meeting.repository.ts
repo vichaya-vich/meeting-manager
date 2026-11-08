@@ -8,6 +8,10 @@ import { trimAndLowercase } from '../utils/string.util'
 export class MeetingRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
+  findById(id: number) {
+    return this.prisma.meeting.findUnique({ where: { id } })
+  }
+
   createWithCandidate(input: CreateMeetingWithCandidateInput) {
     const { name, ...meeting } = input
     const nameNormalized = trimAndLowercase(name)

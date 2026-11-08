@@ -2,6 +2,8 @@ import { NextFunction, Request, Response } from 'express'
 import { ZodError } from 'zod'
 import { Prisma } from '../generated/prisma/client'
 
+export class ApplicationError extends Error {}
+
 export function errorHandler(
   error: unknown,
   request: Request,
@@ -13,6 +15,11 @@ export function errorHandler(
   }
 
   const requestDetail = { method: request.method, url: request.originalUrl }
+
+  if (error instanceof ApplicationError) {
+    console.warn('[400] Application Error', requestDetail, error)
+    return response.status(400).json({ error: error.message })
+  }
 
   if (error instanceof SyntaxError && 'body' in error) {
     console.warn('[400] Invalid Syntax', requestDetail)
