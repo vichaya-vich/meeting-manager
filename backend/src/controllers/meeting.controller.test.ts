@@ -11,6 +11,7 @@ describe('MeetingController', () => {
     cancelMeeting: Mock
     feedback: Mock
     findMeetings: Mock
+    findMeeting: Mock
   }
   let controller: MeetingController
   let response: Response
@@ -23,6 +24,7 @@ describe('MeetingController', () => {
       cancelMeeting: vi.fn(),
       feedback: vi.fn(),
       findMeetings: vi.fn(),
+      findMeeting: vi.fn(),
     }
     controller = new MeetingController(meetingService as unknown as MeetingService)
 
@@ -170,6 +172,34 @@ describe('MeetingController', () => {
       meetingService.findMeetings.mockRejectedValue(error)
 
       await controller.getMeetings(request, response, next)
+
+      expect(next).toHaveBeenCalledWith(error)
+      expect(response.status).not.toHaveBeenCalled()
+      expect(response.json).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('getMeeting', () => {
+    const params = { id: '1' }
+    const request = { params } as Request<{ id: string }>
+
+    test('should response 200 with response data', async () => {
+      const meetings = { id: 1 }
+      meetingService.findMeeting.mockResolvedValue(meetings)
+
+      await controller.getMeeting(request, response, next)
+
+      expect(meetingService.findMeeting).toHaveBeenCalledWith(1)
+      expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.json).toHaveBeenCalledWith(meetings)
+      expect(next).not.toHaveBeenCalled()
+    })
+
+    test('should pass error to next when service error', async () => {
+      const error = new Error('error')
+      meetingService.findMeeting.mockRejectedValue(error)
+
+      await controller.getMeeting(request, response, next)
 
       expect(next).toHaveBeenCalledWith(error)
       expect(response.status).not.toHaveBeenCalled()

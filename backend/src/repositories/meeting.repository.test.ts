@@ -45,6 +45,22 @@ describe('MeetingRepository', () => {
     })
   })
 
+  describe('findByIdWithCandidate', () => {
+    const meeting = { name: 'John Doe' }
+
+    test('should return existing meeting', async () => {
+      prisma.meeting.findUnique.mockResolvedValue(meeting)
+
+      const result = await repository.findByIdWithCandidate(1)
+
+      expect(result).toEqual(meeting)
+      expect(prisma.meeting.findUnique).toHaveBeenCalledWith({
+        where: { id: 1 },
+        include: { candidate: true },
+      })
+    })
+  })
+
   describe('findManyWithCandidate', () => {
     const meeting = { name: 'John Doe' }
 

@@ -72,4 +72,14 @@ export class MeetingController {
       next(error)
     }
   }
+
+  getMeeting: RequestHandler<{ id: string }> = async (request, response, next): Promise<void> => {
+    try {
+      const id = Number(request.params.id)
+      const result = await this.meetingService.findMeeting(id)
+      response.status(200).json(result)
+    } catch (error) {
+      next(error)
+    }
+  }
 }

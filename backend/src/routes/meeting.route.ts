@@ -8,6 +8,7 @@ import { meetingCreateSchema } from '../schemas/meeting-create.schema'
 import { meetingFeedbackSchema } from '../schemas/meeting-feedback.schema'
 import { meetingListSchema } from '../schemas/meeting-list.schema'
 import { meetingUpdateSchema } from '../schemas/meeting-update.schema'
+import { meetingSchema } from '../schemas/meeting.schema'
 import { MeetingService } from '../services/meeting.service'
 
 export const meetingRouter = (prisma: PrismaClient) => {
@@ -23,6 +24,7 @@ export const meetingRouter = (prisma: PrismaClient) => {
   router.put('/:id/feedback', validateData(meetingFeedbackSchema), controller.feedbackMeeting)
 
   router.get('/', validateData(meetingListSchema), controller.getMeetings)
+  router.get('/:id', validateData(meetingSchema), controller.getMeeting)
 
   return router
 }

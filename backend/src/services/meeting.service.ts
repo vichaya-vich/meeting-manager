@@ -99,6 +99,16 @@ export class MeetingService {
     return meetings.map(this.mappingMeetingResponse)
   }
 
+  async findMeeting(id: number): Promise<MeetingResponseDto> {
+    const existing = await this.meetingRepository.findByIdWithCandidate(id)
+
+    if (!existing) {
+      throw new ApplicationError('Meeting Not Found')
+    }
+
+    return this.mappingMeetingResponse(existing)
+  }
+
   private mappingMeetingResponse(meeting: MeetingWithCandidate): MeetingResponseDto {
     const { candidate } = meeting
 

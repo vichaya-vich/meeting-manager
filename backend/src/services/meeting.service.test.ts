@@ -10,6 +10,7 @@ import { MeetingService } from '../services/meeting.service'
 describe('MeetingService', () => {
   let meetingRepository: {
     findById: Mock
+    findByIdWithCandidate: Mock
     findManyWithCandidate: Mock
     createWithCandidate: Mock
     updateWithCandidate: Mock
@@ -20,6 +21,7 @@ describe('MeetingService', () => {
   beforeEach(() => {
     meetingRepository = {
       findById: vi.fn(),
+      findByIdWithCandidate: vi.fn(),
       findManyWithCandidate: vi.fn(),
       createWithCandidate: vi.fn(),
       updateWithCandidate: vi.fn(),
@@ -352,6 +354,53 @@ describe('MeetingService', () => {
         new ApplicationError('Invalid Meeting Scope'),
       )
       expect(meetingRepository.findManyWithCandidate).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('findMeeting', () => {
+    const date = new Date()
+    const meeting = {
+      id: 1,
+      note: 'note',
+      type: MeetingType.OFFLINE,
+      status: MeetingStatus.PENDING,
+      startAt: new Date('2026-11-08T12:00:00+07:00'),
+      endAt: new Date('2026-11-08T15:00:00+07:00'),
+      role: Role.BACKEND,
+      createdAt: date,
+      updatedAt: date,
+      candidate: { name: 'name', id: 3 },
+    }
+
+    test('should return existing meeting', async () => {
+      meetingRepository.findByIdWithCandidate.mockResolvedValue(meeting)
+
+      const result = await service.findMeeting(1)
+
+      expect(meetingRepository.findByIdWithCandidate).toHaveBeenCalledWith(1)
+      expect(result).toEqual({
+        id: meeting.id,
+        name: 'name',
+        candidateId: 3,
+        type: meeting.type,
+        status: meeting.status,
+        startAt: meeting.startAt,
+        endAt: meeting.endAt,
+        role: meeting.role,
+        note: meeting.note,
+        createdAt: meeting.createdAt,
+        updatedAt: meeting.updatedAt,
+      })
+    })
+
+    test('should throw error when existing meeting is not found', async () => {
+      meetingRepository.findByIdWithCandidate.mockResolvedValue(undefined)
+
+      await expect(service.findMeeting(1)).rejects.toThrow(
+        new ApplicationError('Meeting Not Found'),
+      )
+      expect(meetingRepository.findByIdWithCandidate).toHaveBeenCalledWith(1)
+      expect(meetingRepository.update).not.toHaveBeenCalled()
     })
   })
 })

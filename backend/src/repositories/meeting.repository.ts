@@ -19,6 +19,10 @@ export class MeetingRepository {
     return this.prisma.meeting.findUnique({ where: { id } })
   }
 
+  findByIdWithCandidate(id: number) {
+    return this.prisma.meeting.findUnique({ where: { id }, ...meetingWithCandidate })
+  }
+
   findManyWithCandidate(params: MeetingsParams, orderBy: Prisma.MeetingOrderByWithRelationInput) {
     const where: Prisma.MeetingWhereInput = {}
 
@@ -37,7 +41,7 @@ export class MeetingRepository {
       where.candidateId = params.candidateId
     }
 
-    return this.prisma.meeting.findMany({ ...meetingWithCandidate, where, orderBy })
+    return this.prisma.meeting.findMany({ where, orderBy, ...meetingWithCandidate })
   }
 
   createWithCandidate(input: CreateMeetingWithCandidateInput) {
