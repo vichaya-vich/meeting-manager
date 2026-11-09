@@ -1,10 +1,12 @@
 import { afterEach, beforeEach, describe, expect, Mock, test, vi } from 'vitest'
+import { Role } from '../enums/role.enum'
 import { PrismaClient } from '../generated/prisma/client'
 import { CandidateRepository } from './candidate.repository'
 
 describe('MeetingRepository', () => {
   let prisma: {
     candidate: {
+      findUnique: Mock
       findMany: Mock
     }
   }
@@ -13,6 +15,7 @@ describe('MeetingRepository', () => {
   beforeEach(() => {
     prisma = {
       candidate: {
+        findUnique: vi.fn(),
         findMany: vi.fn(),
       },
     }
@@ -20,6 +23,23 @@ describe('MeetingRepository', () => {
   })
 
   afterEach(() => vi.clearAllMocks())
+
+  describe('findByIdAndRoleWithMeeting', () => {
+    const candidate = { id: 1, name: 'name1' }
+
+    test('should return existing candidate', async () => {
+      const role = Role.FRONTEND
+      prisma.candidate.findUnique.mockResolvedValue(candidate)
+
+      const result = await repository.findByIdAndRoleWithMeeting(1, role)
+
+      expect(result).toBe(candidate)
+      expect(prisma.candidate.findUnique).toHaveBeenCalledWith({
+        where: { id: 1, meetings: { some: { role } } },
+        include: { meetings: { where: { role } } },
+      })
+    })
+  })
 
   describe('findManyByName', () => {
     test('should return list of candidate name', async () => {
