@@ -1,5 +1,9 @@
 import { RequestHandler } from 'express'
-import { MeetingCreateRequestDto, MeetingUpdateRequestDto } from '../dto/meeting-request.dto'
+import {
+  MeetingCreateRequestDto,
+  MeetingListRequestDto,
+  MeetingUpdateRequestDto,
+} from '../dto/meeting-request.dto'
 import { MeetingService } from '../services/meeting.service'
 
 export class MeetingController {
@@ -60,13 +64,10 @@ export class MeetingController {
     }
   }
 
-  getMeetings: RequestHandler<{}, {}, {}, { scope: string }> = async (
-    request,
-    response,
-    next,
-  ): Promise<void> => {
+  getMeetings: RequestHandler = async (request, response, next): Promise<void> => {
     try {
-      const result = await this.meetingService.findMeetings(request.query.scope)
+      const query = request.query as unknown as MeetingListRequestDto
+      const result = await this.meetingService.findMeetings(query)
       response.status(200).json(result)
     } catch (error) {
       next(error)

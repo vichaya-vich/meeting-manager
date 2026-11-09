@@ -1,4 +1,8 @@
-import { MeetingCreateRequestDto, MeetingUpdateRequestDto } from '../dto/meeting-request.dto'
+import {
+  MeetingCreateRequestDto,
+  MeetingListRequestDto,
+  MeetingUpdateRequestDto,
+} from '../dto/meeting-request.dto'
 import { MeetingResponseDto, MeetingUpdateResponseDto } from '../dto/meeting-response.dto'
 import { MeetingScope } from '../enums/meeting-scope.enum'
 import { Prisma } from '../generated/prisma/client'
@@ -74,12 +78,12 @@ export class MeetingService {
     }
   }
 
-  async findMeetings(scope: string): Promise<MeetingResponseDto[]> {
+  async findMeetings(request: MeetingListRequestDto): Promise<MeetingResponseDto[]> {
     const currentDate = new Date()
     const statuses = [MeetingStatus.PENDING, MeetingStatus.CONFIRM]
     let params: MeetingsParams, orderBy: Prisma.MeetingOrderByWithRelationInput
 
-    switch (scope) {
+    switch (request.scope) {
       case MeetingScope.UPCOMING: {
         params = { statuses, endAfter: currentDate }
         orderBy = { endAt: 'asc' }
@@ -95,7 +99,8 @@ export class MeetingService {
       }
     }
 
-    const meetings = await this.meetingRepository.findManyWithCandidate(params, orderBy)
+    const cursor = Number(request.cursor)
+    const meetings = await this.meetingRepository.findManyWithCandidate(params, orderBy, cursor, 10)
     return meetings.map(this.mappingMeetingResponse)
   }
 

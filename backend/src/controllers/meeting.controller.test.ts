@@ -161,7 +161,7 @@ describe('MeetingController', () => {
 
       await controller.getMeetings(request, response, next)
 
-      expect(meetingService.findMeetings).toHaveBeenCalledWith('scope1')
+      expect(meetingService.findMeetings).toHaveBeenCalledWith(query)
       expect(response.status).toHaveBeenCalledWith(200)
       expect(response.json).toHaveBeenCalledWith(meetings)
       expect(next).not.toHaveBeenCalled()

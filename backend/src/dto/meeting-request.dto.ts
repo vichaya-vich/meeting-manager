@@ -19,3 +19,8 @@ export interface MeetingUpdateRequestDto {
   note?: string
   status: MeetingStatus
 }
+
+export interface MeetingListRequestDto {
+  scope: string
+  cursor?: string | undefined
+}

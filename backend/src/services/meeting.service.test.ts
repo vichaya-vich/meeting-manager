@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, describe, expect, Mock, test, vi } from 'vitest'
-import { MeetingCreateRequestDto, MeetingUpdateRequestDto } from '../dto/meeting-request.dto'
+import {
+  MeetingCreateRequestDto,
+  MeetingListRequestDto,
+  MeetingUpdateRequestDto,
+} from '../dto/meeting-request.dto'
 import { MeetingScope } from '../enums/meeting-scope.enum'
 import { Role } from '../enums/role.enum'
 import { MeetingStatus, MeetingType } from '../generated/prisma/client'
@@ -294,6 +298,10 @@ describe('MeetingService', () => {
 
   describe('findMeetings', () => {
     const date = new Date('2026-11-08T10:00:00+07:00')
+    const request: MeetingListRequestDto = {
+      scope: MeetingScope.UPCOMING,
+      cursor: '1',
+    }
     const statuses = [MeetingStatus.PENDING, MeetingStatus.CONFIRM]
     const meeting = {
       id: 1,
@@ -326,31 +334,35 @@ describe('MeetingService', () => {
     test('should return upcoming meeting when scope is upcoming', async () => {
       meetingRepository.findManyWithCandidate.mockResolvedValue([meeting])
 
-      const result = await service.findMeetings(MeetingScope.UPCOMING)
+      const result = await service.findMeetings(request)
 
       expect(result.length).toBe(1)
       expect(result[0]).toEqual(expected)
       expect(meetingRepository.findManyWithCandidate).toHaveBeenCalledWith(
         { statuses, endAfter: date },
         { endAt: 'asc' },
+        1,
+        10,
       )
     })
 
     test('should return upcoming meeting when scope is finished', async () => {
       meetingRepository.findManyWithCandidate.mockResolvedValue([meeting])
 
-      const result = await service.findMeetings(MeetingScope.FINISHED)
+      const result = await service.findMeetings({ ...request, scope: MeetingScope.FINISHED })
 
       expect(result.length).toBe(1)
       expect(result[0]).toEqual(expected)
       expect(meetingRepository.findManyWithCandidate).toHaveBeenCalledWith(
         { statuses, endBefore: date },
         { endAt: 'desc' },
+        1,
+        10,
       )
     })
 
     test('should throw error when scope is invalid', async () => {
-      await expect(service.findMeetings('NOT_SCOPE')).rejects.toThrow(
+      await expect(service.findMeetings({ ...request, scope: 'NOT_SCOPE' })).rejects.toThrow(
         new ApplicationError('Invalid Meeting Scope'),
       )
       expect(meetingRepository.findManyWithCandidate).not.toHaveBeenCalled()

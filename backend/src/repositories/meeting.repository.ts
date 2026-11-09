@@ -10,6 +10,12 @@ const meetingWithCandidate = {
   include: { candidate: true },
 }
 
+interface MeetingPagination {
+  cursor?: Prisma.MeetingWhereUniqueInput
+  skip?: number
+  take?: number
+}
+
 export type MeetingWithCandidate = Prisma.MeetingGetPayload<typeof meetingWithCandidate>
 
 export class MeetingRepository {
@@ -23,8 +29,14 @@ export class MeetingRepository {
     return this.prisma.meeting.findUnique({ where: { id }, ...meetingWithCandidate })
   }
 
-  findManyWithCandidate(params: MeetingsParams, orderBy: Prisma.MeetingOrderByWithRelationInput) {
+  findManyWithCandidate(
+    params: MeetingsParams,
+    orderBy: Prisma.MeetingOrderByWithRelationInput,
+    cursor?: number,
+    take?: number,
+  ) {
     const where: Prisma.MeetingWhereInput = {}
+    const pagination: MeetingPagination = {}
 
     if (params.statuses?.length) {
       where.status = { in: params.statuses }
@@ -41,7 +53,16 @@ export class MeetingRepository {
       where.candidateId = params.candidateId
     }
 
-    return this.prisma.meeting.findMany({ where, orderBy, ...meetingWithCandidate })
+    if (cursor !== undefined) {
+      pagination.cursor = { id: cursor }
+      pagination.skip = 1
+    }
+
+    if (take !== undefined) {
+      pagination.take = take
+    }
+
+    return this.prisma.meeting.findMany({ where, orderBy, ...pagination, ...meetingWithCandidate })
   }
 
   createWithCandidate(input: CreateMeetingWithCandidateInput) {

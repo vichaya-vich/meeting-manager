@@ -136,6 +136,42 @@ describe('MeetingRepository', () => {
         orderBy: { id: 'asc' },
       })
     })
+
+    test('should return list of meeting when find meeting with cursor', async () => {
+      prisma.meeting.findMany.mockResolvedValue([meeting])
+
+      const result = await repository.findManyWithCandidate({ candidateId: 1 }, { id: 'asc' }, 1)
+
+      expect(result.length).toBe(1)
+      expect(result[0]).toBe(meeting)
+      expect(prisma.meeting.findMany).toHaveBeenCalledWith({
+        where: { candidateId: 1 },
+        include: { candidate: true },
+        orderBy: { id: 'asc' },
+        cursor: { id: 1 },
+        skip: 1,
+      })
+    })
+
+    test('should return list of meeting when find meeting with take', async () => {
+      prisma.meeting.findMany.mockResolvedValue([meeting])
+
+      const result = await repository.findManyWithCandidate(
+        { candidateId: 1 },
+        { id: 'asc' },
+        undefined,
+        10,
+      )
+
+      expect(result.length).toBe(1)
+      expect(result[0]).toBe(meeting)
+      expect(prisma.meeting.findMany).toHaveBeenCalledWith({
+        where: { candidateId: 1 },
+        include: { candidate: true },
+        orderBy: { id: 'asc' },
+        take: 10,
+      })
+    })
   })
 
   describe('createWithCandidate', () => {
