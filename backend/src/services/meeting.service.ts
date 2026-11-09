@@ -99,7 +99,7 @@ export class MeetingService {
       }
     }
 
-    const cursor = Number(request.cursor)
+    const cursor = request.cursor !== undefined ? Number(request.cursor) : undefined
     const meetings = await this.meetingRepository.findManyWithCandidate(params, orderBy, cursor, 10)
     return meetings.map(this.mappingMeetingResponse)
   }
