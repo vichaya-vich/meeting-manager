@@ -1,0 +1,88 @@
+import { NextFunction, Request, Response } from 'express'
+import { afterEach, beforeEach, describe, expect, Mock, test, vi } from 'vitest'
+import { Role } from '../enums/role.enum'
+import { CandidateService } from '../services/candidate.service'
+import { CandidateController } from './candidate.controller'
+
+describe('MeetingController', () => {
+  let candidateService: {
+    findCandidateNames: Mock
+    findCandidate: Mock
+  }
+  let controller: CandidateController
+  let response: Response
+  let next: NextFunction
+
+  beforeEach(() => {
+    candidateService = {
+      findCandidateNames: vi.fn(),
+      findCandidate: vi.fn(),
+    }
+    controller = new CandidateController(candidateService as unknown as CandidateService)
+
+    response = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn(),
+    } as unknown as Response
+    next = vi.fn()
+  })
+
+  afterEach(() => vi.clearAllMocks())
+
+  describe('getCandidateNames', () => {
+    const query = { name: 'name1' }
+    const request = { query } as Request<{}, {}, {}, { name: string }>
+
+    test('should response 200 with response data', async () => {
+      const names = ['name1']
+      candidateService.findCandidateNames.mockResolvedValue(names)
+
+      await controller.getCandidateNames(request, response, next)
+
+      expect(candidateService.findCandidateNames).toHaveBeenCalledWith('name1')
+      expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.json).toHaveBeenCalledWith(names)
+      expect(next).not.toHaveBeenCalled()
+    })
+
+    test('should pass error to next when service error', async () => {
+      const error = new Error('error')
+      candidateService.findCandidateNames.mockRejectedValue(error)
+
+      await controller.getCandidateNames(request, response, next)
+
+      expect(next).toHaveBeenCalledWith(error)
+      expect(response.status).not.toHaveBeenCalled()
+      expect(response.json).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('getCandidate', () => {
+    const params = { id: '1' }
+    const query = { role: Role.BACKEND }
+    const request = { params, query } as Request<{ id: string }, {}, {}, { role: string }>
+
+    test('should response 200 with response data', async () => {
+      const candidate = { id: 1 }
+      candidateService.findCandidate.mockResolvedValue(candidate)
+
+      await controller.getCandidate(request, response, next)
+
+      expect(candidateService.findCandidate).toHaveBeenCalledWith(1, Role.BACKEND)
+      expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.json).toHaveBeenCalledWith(candidate)
+      expect(next).not.toHaveBeenCalled()
+    })
+
+    test('should pass error to next when service error', async () => {
+      const error = new Error('error')
+      candidateService.findCandidate.mockRejectedValue(error)
+
+      await controller.getCandidate(request, response, next)
+
+      expect(next).toHaveBeenCalledWith(error)
+      expect(response.status).not.toHaveBeenCalled()
+      expect(response.json).not.toHaveBeenCalled()
+    })
+  })
+})
