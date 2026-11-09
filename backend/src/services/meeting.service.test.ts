@@ -361,6 +361,21 @@ describe('MeetingService', () => {
       )
     })
 
+    test('should return upcoming meeting when cursor is undefined', async () => {
+      meetingRepository.findManyWithCandidate.mockResolvedValue([meeting])
+
+      const result = await service.findMeetings({ scope: MeetingScope.UPCOMING })
+
+      expect(result.length).toBe(1)
+      expect(result[0]).toEqual(expected)
+      expect(meetingRepository.findManyWithCandidate).toHaveBeenCalledWith(
+        { statuses, endAfter: date },
+        { endAt: 'asc' },
+        undefined,
+        10,
+      )
+    })
+
     test('should throw error when scope is invalid', async () => {
       await expect(service.findMeetings({ ...request, scope: 'NOT_SCOPE' })).rejects.toThrow(
         new ApplicationError('Invalid Meeting Scope'),
