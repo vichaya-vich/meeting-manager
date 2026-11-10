@@ -50,7 +50,7 @@ describe('MeetingRepository', () => {
       expect(result.length).toBe(1)
       expect(result[0]).toBe('name1')
       expect(prisma.candidate.findMany).toHaveBeenCalledWith({
-        where: { name: { startsWith: 'name1' } },
+        where: { nameNormalized: { startsWith: 'name1' } },
       })
     })
   })

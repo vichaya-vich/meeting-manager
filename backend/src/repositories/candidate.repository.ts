@@ -11,6 +11,6 @@ export class CandidateRepository {
   }
 
   findManyByName(name: string) {
-    return this.prisma.candidate.findMany({ where: { name: { startsWith: name } } })
+    return this.prisma.candidate.findMany({ where: { nameNormalized: { startsWith: name } } })
   }
 }
