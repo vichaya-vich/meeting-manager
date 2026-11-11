@@ -1,6 +1,6 @@
 import { apiService } from '@/api/apiService'
 import type { MeetingScopeKey } from '@/constants/meetingScope'
-import type { MeetingCreateRequestDto } from '@/interfaces/meetingRequest'
+import type { MeetingCreateRequestDto, MeetingUpdateRequestDto } from '@/interfaces/meetingRequest'
 import type { MeetingResponseDto } from '@/interfaces/meetingResponse'
 
 export const meetingService = {
@@ -11,6 +11,9 @@ export const meetingService = {
 
   createMeeting: (body: MeetingCreateRequestDto) =>
     apiService.post<MeetingResponseDto>('/api/meetings', body).then(async ({ data }) => data),
+
+  updateMeeting: (id: number, body: MeetingUpdateRequestDto) =>
+    apiService.put<MeetingResponseDto>(`/api/meetings/${id}`, body).then(async ({ data }) => data),
 
   cancelMeeting: (id: number) =>
     apiService.put(`/api/meetings/${id}/cancel`).then(async ({ data }) => data),
