@@ -19,18 +19,20 @@ import { DatePicker, TimePicker } from '@mui/x-date-pickers'
 import dayjs, { isDayjs } from 'dayjs'
 import { Controller, type Control } from 'react-hook-form'
 
-const MeetingFormFields = ({
+const MeetingFormFields = <T extends MeetingFormType>({
   control,
   names,
 }: {
-  control: Control<MeetingFormType>
+  control: Control<T>
   names: string[]
 }) => {
+  const formControl = control as unknown as Control<MeetingFormType>
+
   return (
     <Stack spacing={1} sx={{ marginTop: '5px' }}>
       <Controller
         name="name"
-        control={control}
+        control={formControl}
         rules={{
           required: 'Candidate name is required',
           maxLength: { value: 50, message: 'Candidate name must be at most 50 characters' },
@@ -61,7 +63,7 @@ const MeetingFormFields = ({
 
       <Controller
         name="role"
-        control={control}
+        control={formControl}
         rules={{ required: 'Position is required' }}
         render={({ field, fieldState: { error } }) => (
           <FormControl id="role-label" error={!!error}>
@@ -81,7 +83,7 @@ const MeetingFormFields = ({
 
       <Controller
         name="date"
-        control={control}
+        control={formControl}
         rules={{
           required: 'Date is required',
           validate: (date) => {
@@ -110,7 +112,7 @@ const MeetingFormFields = ({
       <Stack direction="row" spacing={1}>
         <Controller
           name="start"
-          control={control}
+          control={formControl}
           rules={{
             required: 'Start time is required',
             validate: (start, { date }) => {
@@ -139,7 +141,7 @@ const MeetingFormFields = ({
 
         <Controller
           name="end"
-          control={control}
+          control={formControl}
           rules={{
             required: 'End time is required',
             validate: (end, { start }) => {
@@ -170,7 +172,7 @@ const MeetingFormFields = ({
 
       <Controller
         name="type"
-        control={control}
+        control={formControl}
         rules={{ required: 'Meeting type is required' }}
         render={({ field, fieldState: { error } }) => (
           <FormControl id="type-label" error={!!error}>
@@ -189,7 +191,7 @@ const MeetingFormFields = ({
 
       <Controller
         name="note"
-        control={control}
+        control={formControl}
         rules={{ maxLength: { value: 500, message: 'Note must be at most 500 characters' } }}
         render={({ field, fieldState: { error } }) => (
           <TextField

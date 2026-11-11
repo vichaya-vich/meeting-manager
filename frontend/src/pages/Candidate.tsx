@@ -1,9 +1,13 @@
 import AlertModal from '@/components/AlertModal'
 import ConfirmModal from '@/components/ConfirmModal'
 import { MeetingStatus } from '@/constants/meetingStatus'
+import { MeetingType } from '@/constants/meetingType'
 import { PAGE } from '@/constants/pageUri'
 import { Role, type RoleKey } from '@/constants/role'
+import EditMeetingModal from '@/containers/EditMeetingModal'
 import FeedbackModal from '@/containers/FeedbackModal'
+import type { MeetingUpdateFormType } from '@/interfaces/meetingForm'
+import type { MeetingResponseDto } from '@/interfaces/meetingResponse'
 import { candidateQuery } from '@/queries/candidateQuery'
 import { meetingQuery } from '@/queries/meetingQuery'
 import { formatDateTimeDisplay } from '@/utils/dateUtil'
@@ -18,6 +22,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
+import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
@@ -30,6 +35,7 @@ const Candidate = () => {
 
   const [cancelId, setCancelId] = useState<number>()
   const [feedbackData, setFeedbackData] = useState<{ id?: number; feedback?: string }>()
+  const [meeting, setMeeting] = useState<MeetingUpdateFormType>()
   const [showAlert, setShowAlert] = useState(false)
 
   const { data: candidate, isFetching, isError, refetch } = candidateQuery.useGetCandidate(id, role)
@@ -63,6 +69,27 @@ const Candidate = () => {
     }
   }
 
+  const onEditMeeting = (data: MeetingResponseDto) => {
+    setMeeting({
+      id: data.id,
+      name: data.name,
+      role: data.role,
+      date: dayjs(data.startAt),
+      start: dayjs(data.startAt),
+      end: dayjs(data.endAt),
+      type: data.type,
+      status: data.status,
+      note: data.note ?? undefined,
+    })
+  }
+
+  const onConfirmEdit = () => {
+    if (meeting !== undefined) {
+      setMeeting(undefined)
+      refetch()
+    }
+  }
+
   const { upcomings = [], histories = [] } = candidate
 
   return (
@@ -83,6 +110,13 @@ const Candidate = () => {
           feedback={feedbackData?.feedback}
           onCancel={() => setFeedbackData(undefined)}
           onCofirm={onConfirmFeedback}
+        />
+      )}
+      {meeting !== undefined && (
+        <EditMeetingModal
+          meeting={meeting}
+          onCancel={() => setMeeting(undefined)}
+          onCofirm={onConfirmEdit}
         />
       )}
       <Box
@@ -132,6 +166,9 @@ const Candidate = () => {
                         <Typography variant="body2">
                           <b>Status :</b> {MeetingStatus[data.status]}
                         </Typography>
+                        <Typography variant="body2">
+                          <b>Meeting Type :</b> {MeetingType[data.type]}
+                        </Typography>
                       </CardContent>
                       <CardActions sx={{ justifyContent: 'flex-end' }}>
                         <Button
@@ -141,7 +178,9 @@ const Candidate = () => {
                         >
                           Cancel Meeting
                         </Button>
-                        <Button variant="contained">Edit Meeting</Button>
+                        <Button variant="contained" onClick={() => onEditMeeting(data)}>
+                          Edit Meeting
+                        </Button>
                       </CardActions>
                     </Card>
                   ))}
@@ -172,6 +211,9 @@ const Candidate = () => {
                         </Typography>
                         <Typography variant="body2">
                           <b>Status :</b> {MeetingStatus[data.status]}
+                        </Typography>
+                        <Typography variant="body2">
+                          <b>Meeting Type :</b> {MeetingType[data.type]}
                         </Typography>
                         <Typography variant="body2">
                           <b>Feedback :</b> {data.feedback}
