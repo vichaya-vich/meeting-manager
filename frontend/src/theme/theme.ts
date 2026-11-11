@@ -1,4 +1,5 @@
 import { createTheme } from '@mui/material'
+import type {} from '@mui/x-date-pickers/themeAugmentation'
 
 export const theme = createTheme({
   shape: { borderRadius: 25 },
@@ -18,5 +19,6 @@ export const theme = createTheme({
   components: {
     MuiCard: { defaultProps: { variant: 'outlined' } },
     MuiButton: { styleOverrides: { root: { textTransform: 'none' } } },
+    MuiDatePicker: { defaultProps: { format: 'DD/MM/YYYY' } },
   },
 })

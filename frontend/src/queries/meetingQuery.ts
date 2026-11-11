@@ -1,6 +1,7 @@
 import { meetingService } from '@/api/meetingService'
 import type { MeetingScopeKey } from '@/constants/meetingScope'
-import { useInfiniteQuery } from '@tanstack/react-query'
+import type { MeetingCreateRequestDto } from '@/interfaces/meetingRequest'
+import { useInfiniteQuery, useMutation } from '@tanstack/react-query'
 
 const PAGE_SIZE = 10
 
@@ -13,5 +14,10 @@ export const meetingQuery = {
       initialPageParam: null as number | null,
       getNextPageParam: (lastPage) =>
         lastPage.length === PAGE_SIZE ? lastPage[lastPage.length - 1].id : undefined,
+    }),
+
+  useCreateMeetingMutation: () =>
+    useMutation({
+      mutationFn: (body: MeetingCreateRequestDto) => meetingService.createMeeting(body),
     }),
 }
