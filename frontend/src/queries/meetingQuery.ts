@@ -20,4 +20,9 @@ export const meetingQuery = {
     useMutation({
       mutationFn: (body: MeetingCreateRequestDto) => meetingService.createMeeting(body),
     }),
+
+  useCancelMeetingMutation: () =>
+    useMutation({
+      mutationFn: (id: number) => meetingService.cancelMeeting(id),
+    }),
 }

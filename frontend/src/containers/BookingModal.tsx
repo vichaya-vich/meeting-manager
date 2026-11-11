@@ -16,6 +16,7 @@ const BookingModal = ({ open, onClose }: { open: boolean; onClose: () => void })
   const name = useWatch({ control, name: 'name', defaultValue: '' })
 
   const { data: names = [] } = candidateQuery.useGetNames(name.toLowerCase(), name.length >= 3)
+
   const mutation = meetingQuery.useCreateMeetingMutation()
 
   const onSubmit = (form: MeetingFormType) => {

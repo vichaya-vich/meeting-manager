@@ -13,4 +13,7 @@ export const meetingService = {
     apiService
       .post<MeetingResponseDto>('/api/meetings', { ...body })
       .then(async ({ data }) => data),
+
+  cancelMeeting: (id: number) =>
+    apiService.put(`/api/meetings/${id}/cancel`).then(async ({ data }) => data),
 }
