@@ -18,7 +18,7 @@ export default function App() {
           <BrowserRouter>
             <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
               <Navbar />
-              <Container component="main" sx={{ flex: 1, minHeight: 0 }}>
+              <Container component="main" sx={{ flex: 1, minHeight: 0, display: 'flex' }}>
                 <AppRoutes />
               </Container>
             </Box>

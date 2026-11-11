@@ -1,7 +1,7 @@
 export const Role = {
   SOFTWARE_ENGINEER: 'Software Engineer',
-  FRONTEND: 'Backend',
-  BACKEND: 'Frontend',
+  FRONTEND: 'Frontend',
+  BACKEND: 'Backend',
 }
 
 export type RoleKey = keyof typeof Role

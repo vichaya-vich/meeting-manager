@@ -1,22 +1,25 @@
 import { MeetingScope, type MeetingScopeKey } from '@/constants/meetingScope'
 import { MeetingStatus } from '@/constants/meetingStatus'
+import { PAGE } from '@/constants/pageUri'
 import { Role } from '@/constants/role'
 import { meetingQuery } from '@/queries/meetingQuery'
+import { formatDateTimeDisplay } from '@/utils/dateUtil'
 import {
   Box,
   Card,
+  CardActions,
   CardContent,
   CardHeader,
   CircularProgress,
   Divider,
   Fade,
   Grid,
+  Link,
   Stack,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
 } from '@mui/material'
-import dayjs from 'dayjs'
 import { useEffect, useRef, useState } from 'react'
 
 const Dashboard = () => {
@@ -25,12 +28,6 @@ const Dashboard = () => {
 
   const { data, isFetching, isFetchingNextPage, fetchNextPage, hasNextPage } =
     meetingQuery.useGetMeetingsInfinite(scope)
-
-  const formatDateTime = (start: Date, end: Date) => {
-    const dateTimeStart = dayjs(start).format('MMM DD, YYYY · HH:mm A')
-    const timeEnd = dayjs(end).format('HH:mm A')
-    return `${dateTimeStart} - ${timeEnd}`
-  }
 
   const onChangeScope = (_event: React.MouseEvent, value: MeetingScopeKey) => {
     if (value !== null) {
@@ -112,12 +109,21 @@ const Dashboard = () => {
               <Divider variant="middle" />
               <CardContent>
                 <Typography variant="body1">
-                  <b>Date & Time :</b> {formatDateTime(data.startAt, data.endAt)}
+                  <b>Date & Time :</b> {formatDateTimeDisplay(data.startAt, data.endAt)}
                 </Typography>
                 <Typography variant="body1">
                   <b>Status :</b> {MeetingStatus[data.status]}
                 </Typography>
               </CardContent>
+              <CardActions sx={{ justifyContent: 'flex-end' }}>
+                <Link
+                  href={`${PAGE.CANDIDATE}/${data.candidateId}/${data.role.toLowerCase()}`}
+                  variant="body2"
+                  color="info"
+                >
+                  View Details
+                </Link>
+              </CardActions>
             </Card>
           ))}
           <Fade in={isFetching} unmountOnExit>
