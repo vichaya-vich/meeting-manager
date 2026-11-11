@@ -190,7 +190,7 @@ const MeetingFormFields = ({
       <Controller
         name="note"
         control={control}
-        rules={{ maxLength: { value: 50, message: 'Note must be at most 50 characters' } }}
+        rules={{ maxLength: { value: 500, message: 'Note must be at most 500 characters' } }}
         render={({ field, fieldState: { error } }) => (
           <TextField
             {...field}

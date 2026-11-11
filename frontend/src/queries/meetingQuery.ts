@@ -25,4 +25,10 @@ export const meetingQuery = {
     useMutation({
       mutationFn: (id: number) => meetingService.cancelMeeting(id),
     }),
+
+  useFeedbackMutation: () =>
+    useMutation({
+      mutationFn: ({ id, feedback }: { id: number; feedback: string }) =>
+        meetingService.feedback(id, feedback),
+    }),
 }

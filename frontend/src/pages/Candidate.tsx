@@ -3,6 +3,7 @@ import ConfirmModal from '@/components/ConfirmModal'
 import { MeetingStatus } from '@/constants/meetingStatus'
 import { PAGE } from '@/constants/pageUri'
 import { Role, type RoleKey } from '@/constants/role'
+import FeedbackModal from '@/containers/FeedbackModal'
 import { candidateQuery } from '@/queries/candidateQuery'
 import { meetingQuery } from '@/queries/meetingQuery'
 import { formatDateTimeDisplay } from '@/utils/dateUtil'
@@ -28,6 +29,7 @@ const Candidate = () => {
   const invalidParam = isNaN(id) || !Object.keys(Role).includes(role.toUpperCase())
 
   const [cancelId, setCancelId] = useState<number>()
+  const [feedbackData, setFeedbackData] = useState<{ id?: number; feedback?: string }>()
   const [showAlert, setShowAlert] = useState(false)
 
   const { data: candidate, isFetching, isError, refetch } = candidateQuery.useGetCandidate(id, role)
@@ -54,6 +56,13 @@ const Candidate = () => {
     }
   }
 
+  const onConfirmFeedback = () => {
+    if (feedbackData !== undefined) {
+      setFeedbackData(undefined)
+      refetch()
+    }
+  }
+
   const { upcomings = [], histories = [] } = candidate
 
   return (
@@ -68,6 +77,14 @@ const Candidate = () => {
         onConfirm={onConfirmCancel}
         onCancel={() => setCancelId(undefined)}
       />
+      {feedbackData?.id !== undefined && (
+        <FeedbackModal
+          id={feedbackData.id}
+          feedback={feedbackData?.feedback}
+          onCancel={() => setFeedbackData(undefined)}
+          onCofirm={onConfirmFeedback}
+        />
+      )}
       <Box
         sx={{
           padding: '20px',
@@ -160,9 +177,18 @@ const Candidate = () => {
                           <b>Feedback :</b> {data.feedback}
                         </Typography>
                       </CardContent>
-                      <CardActions sx={{ justifyContent: 'flex-end' }}>
-                        <Button variant="contained">Add Feedback</Button>
-                      </CardActions>
+                      {data.status !== 'CANCELED' && (
+                        <CardActions sx={{ justifyContent: 'flex-end' }}>
+                          <Button
+                            variant="contained"
+                            onClick={() =>
+                              setFeedbackData({ id: data.id, feedback: data.feedback ?? '' })
+                            }
+                          >
+                            Add Feedback
+                          </Button>
+                        </CardActions>
+                      )}
                     </Card>
                   ))}
                 </Stack>
