@@ -52,7 +52,7 @@ describe('CandidateService', () => {
     test('should return list of candidate name', async () => {
       candidateRepository.findManyByName.mockResolvedValue([candidate])
 
-      const result = await service.findCandidateNames('name1')
+      const result = await service.findCandidateNames('Name1')
 
       expect(result.length).toBe(1)
       expect(result[0]).toEqual('name1')
