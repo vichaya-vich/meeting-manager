@@ -129,6 +129,7 @@ const Candidate = () => {
           display: 'flex',
           flexDirection: 'column',
           boxSizing: 'border-box',
+          '&::-webkit-scrollbar': { display: 'none' },
         }}
       >
         <Fade in={isFetching} unmountOnExit>
@@ -155,6 +156,7 @@ const Candidate = () => {
                   padding: '16px',
                   background: 'lightgrey',
                   borderRadius: '25px',
+                  '&::-webkit-scrollbar': { display: 'none' },
                 }}
               >
                 <Stack spacing={2}>
@@ -202,6 +204,7 @@ const Candidate = () => {
                   padding: '16px',
                   background: 'lightgrey',
                   borderRadius: '25px',
+                  '&::-webkit-scrollbar': { display: 'none' },
                 }}
               >
                 <Stack spacing={2}>
