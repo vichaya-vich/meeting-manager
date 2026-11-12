@@ -146,9 +146,10 @@ const Candidate = () => {
               <Box
                 sx={{
                   width: '100%',
-                  height: '100%',
-                  flexShrink: 0,
+                  flex: '0 0 auto',
+                  maxHeight: 'calc(100vh - 200px)',
                   overflowY: 'auto',
+                  boxSizing: 'border-box',
                   marginTop: '10px',
                   marginBottom: '10px',
                   padding: '16px',
@@ -193,9 +194,10 @@ const Candidate = () => {
               <Box
                 sx={{
                   width: '100%',
-                  height: '100%',
-                  flexShrink: 0,
+                  flex: '0 0 auto',
+                  maxHeight: 'calc(100vh - 200px)',
                   overflowY: 'auto',
+                  boxSizing: 'border-box',
                   marginTop: '10px',
                   padding: '16px',
                   background: 'lightgrey',
