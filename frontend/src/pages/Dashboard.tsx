@@ -93,6 +93,7 @@ const Dashboard = () => {
           padding: '16px',
           background: 'lightgrey',
           borderRadius: '25px',
+          '&::-webkit-scrollbar': { display: 'none' },
         }}
       >
         <Stack spacing={2}>
