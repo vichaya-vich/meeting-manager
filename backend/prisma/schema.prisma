@@ -29,10 +29,13 @@ model Meeting {
   note        String?
   feedback    String?
   candidateId Int       @map("candidate_id")
+  createdBy   Int       @map("created_by")
   createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedBy   Int       @map("updated_by")
   updatedAt   DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
 
   candidate   Candidate @relation(fields: [candidateId], references: [id])
+  creator     User      @relation(fields: [createdBy], references: [id])
 
   @@index([startAt])
   @@index([status, startAt])
@@ -48,4 +51,30 @@ model Candidate {
   meetings    Meeting[]
 
   @@map("candidates")
+}
+
+model User {
+  id              Int       @id @default(autoincrement())
+  email           String    @unique
+  password        String
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  sessions       Session[]
+  meetings       Meeting[]
+
+  @@map("users")
+}
+
+model Session {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId           Int       @map("user_id")
+  refreshTokenHash String    @map("refresh_token_hash")
+  expiresAt        DateTime  @map("expires_at") @db.Timestamptz(6)
+  revokedAt        DateTime? @map("revoked_at") @db.Timestamptz(6)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
 }
