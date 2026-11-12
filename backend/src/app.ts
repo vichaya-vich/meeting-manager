@@ -2,6 +2,7 @@ import cors from 'cors'
 import express from 'express'
 import { errorHandler } from './handlers/error.handler'
 import { prisma } from './lib/prisma'
+import { authRouter } from './routes/auth.route'
 import { candidateRouter } from './routes/candidate.route'
 import { meetingRouter } from './routes/meeting.route'
 
@@ -9,6 +10,7 @@ const app = express()
 
 app.use(cors({ origin: process.env.CORS_ORIGIN }))
 app.use(express.json())
+app.use('/api/auth', authRouter(prisma))
 app.use('/api/meetings', meetingRouter(prisma))
 app.use('/api/candidates', candidateRouter(prisma))
 app.use(errorHandler)
