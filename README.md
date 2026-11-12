@@ -27,7 +27,7 @@ meetings.
    POSTGRES_PASSWORD=<password>
    POSTGRES_DB=meeting_manager
 
-   DATABASE_URL=<database_url>
+   DATABASE_URL=postgres://<username>:<password>@db:5432/meeting_manager
    CORS_ORIGIN=http://localhost:8080
 
    VITE_API_BASE_URL=http://localhost:3000
